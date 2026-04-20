@@ -31,7 +31,7 @@ Proyecto académico para la asignatura de Programación de Interfaces Gráficas 
 
 ## ⚙️ Compilación y Ejecución
 
-```bash
+
 # Compilar
 javac -encoding UTF-8 -d out -sourcepath src src/Main.java src/vista/VentanaContactos.java src/controlador/logicaContactos.java src/modelo/Persona.java src/modelo/PersonaDAO.java
 
