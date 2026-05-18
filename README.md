@@ -1,45 +1,39 @@
-# Sistema de Gestión de Contactos - MVC (Elite Edition)
+# Sistema de Gestión de Contactos - MVC
 
-![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=java&logoColor=white)
-![Swing](https://img.shields.io/badge/Swing-GUI-blue?style=for-the-badge)
-![Arquitectura](https://img.shields.io/badge/Arquitectura-MVC-success?style=for-the-badge)
+Aplicación de escritorio en Java Swing (patrón **MVC**) para la asignatura Programación de Interfaces Gráficas — UPS.
 
-Aplicación de escritorio de alto rendimiento desarrollada en Java, aplicando estrictamente el patrón arquitectónico **Modelo-Vista-Controlador (MVC)**. Diseñada con un enfoque en la usabilidad, la eficiencia en la entrada de datos y una estética minimalista "Dark Mode".
+## Características
 
-Proyecto académico para la asignatura de Programación de Interfaces Gráficas - Universidad Politécnica Salesiana.
+- **Unidad 2:** Dark mode, layouts (`BorderLayout`, `GridBagLayout`), i18n ES / EN / PT con `ResourceBundle`.
+- **Unidad 3:** Programación concurrente:
+  - Validación de duplicados en segundo plano (`SwingWorker`).
+  - Búsqueda con `SwingWorker` + debounce (UI no se congela).
+  - Exportación CSV con `ExecutorService` y `synchronized`.
+  - Notificaciones en barra inferior (`SwingUtilities.invokeLater`).
+  - Bloqueo de edición por teléfono y `synchronized` en la lista de contactos.
 
-## 🚀 Características Principales
+## Estructura
 
-### Interfaz y Experiencia de Usuario (UI/UX)
-* **Estética Elite Dark Mode:** Interfaz personalizada construida sobre Swing (`BasicTabbedPaneUI`), utilizando paletas oscuras y tipografía *Segoe UI* para reducir la fatiga visual.
-* **Navegación por Pestañas:** Implementación de `JTabbedPane` para separar el módulo de Gestión del dashboard de Estadísticas.
-* **Feedback Asíncrono:** Uso de `JProgressBar` y `SwingWorker` para simular la carga segura de datos en segundo plano sin congelar la interfaz principal.
-* **Dashboard Dinámico:** Panel de control (`GridBagLayout`) con tarjetas KPI que calculan y actualizan en tiempo real el total de contactos y su distribución.
+```
+src/
+  Main.java
+  modelo/          Persona, PersonaDAO
+  vista/           VentanaContactos
+  controlador/     logicaContactos
+  concurrente/     Hilos, bloqueos, exportador
+  util/            I18nManager
+  i18n/            messages_es|en|pt.properties
+```
 
-### Lógica y Manipulación de Datos
-* **Filtrado en Tiempo Real:** El `JTable` cuenta con un `TableRowSorter` y `RowFilter` (Case-insensitive) que filtra instantáneamente los registros conforme el usuario escribe.
-* **Manejo Avanzado de Eventos:** * Integración de `KeyBindings` a nivel global (`Ctrl+S` para guardar, `Ctrl+E` para exportar).
-  * `JPopupMenu` interactivo (clic derecho sobre las filas detectado vía `MouseAdapter`) para operaciones rápidas de Edición y Eliminación.
-* **Persistencia Robusta:** Los datos se almacenan en formato `.csv` manejados a través del patrón DAO.
-* **Exportación Selectiva:** Funcionalidad para exportar contactos mediante `JFileChooser`. Solo exporta las filas visibles (respeta filtros) y utiliza codificación UTF-8 con inyección BOM (`\ufeff`) para compatibilidad nativa con Excel.
+## Compilar y ejecutar
 
-## 🏗️ Arquitectura del Sistema (Patrón MVC)
-
-* **Modelo (`src/modelo/`):** Entidad `Persona` y lógica de persistencia `PersonaDAO` (`C:/gestionContactos/datosContactos.csv`).
-* **Vista (`src/vista/`):** Únicamente interfaces gráficas (`VentanaContactos`). Cero lógica de negocio, expone componentes mediante getters.
-* **Controlador (`src/controlador/`):** La clase `logicaContactos` orquesta el sistema, vinculando los listeners e inyectando dependencias.
-
-## ⚙️ Compilación y Ejecución
-
-Para compilar y ejecutar el proyecto desde la terminal:
-
-```bash
-# Compilar las fuentes
-javac -encoding UTF-8 -d out -sourcepath src src/Main.java
-
-# Ejecutar la aplicación
+```powershell
+.\compile.ps1
 java -cp out Main
 ```
-👨‍💻 Autor
 
-Paul Mateo Ramos Toapanta - Ingeniería de Software (UPS)
+Datos: `c:/gestionContactos/datosContactos.csv`
+
+## Autor
+
+Paul Mateo Ramos Toapanta — Ingeniería de Software (UPS)
