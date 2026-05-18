@@ -38,7 +38,8 @@ public class logicaContactos {
       Map.entry("Family", "category.family"),
       Map.entry("Friends", "category.friends"),
       Map.entry("Work", "category.work"),
-      Map.entry("Fam\u00edlia", "category.family"));
+      Map.entry("Fam\u00edlia", "category.family"),
+      Map.entry("Trabalho", "category.work"));
 
   private final VentanaContactos vista;
   private final PersonaDAO modelo;
@@ -205,15 +206,19 @@ public class logicaContactos {
   }
 
   private void cambiarIdioma(String codigo) {
-    I18nManager.setIdioma(codigo);
-    vista.setIdiomaActivo(codigo);
-    vista.aplicarTextos();
-    poblarTabla(contactos);
-    lanzarBusquedaEnSegundoPlano();
-    if (filaEnEdicion != null && filaEnEdicion >= 0 && filaEnEdicion < contactos.size()) {
-      cargarFormularioDesdeFila(filaEnEdicion);
+    try {
+      I18nManager.setIdioma(codigo);
+      vista.setIdiomaActivo(codigo);
+      vista.aplicarTextos();
+      poblarTabla(contactos);
+      lanzarBusquedaEnSegundoPlano();
+      if (filaEnEdicion != null && filaEnEdicion >= 0 && filaEnEdicion < contactos.size()) {
+        cargarFormularioDesdeFila(filaEnEdicion);
+      }
+      actualizarEstadisticas();
+    } catch (RuntimeException ex) {
+      notificador.error(I18nManager.get("msg.error.load"));
     }
-    actualizarEstadisticas();
   }
 
   private void poblarTabla(List<Persona> lista) {

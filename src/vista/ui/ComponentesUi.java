@@ -145,15 +145,17 @@ public final class ComponentesUi {
     return tab;
   }
 
-  public static void actualizarEnlacesIdioma(JLabel link, boolean activo) {
+  public static void actualizarEnlacesIdioma(AbstractButton link, boolean activo) {
     link.setFont(new Font("Segoe UI", activo ? Font.BOLD : Font.PLAIN, 13));
     link.setForeground(activo ? Color.WHITE : VentanaContactos.C_MUTED);
     link.setOpaque(activo);
+    link.setContentAreaFilled(activo);
+    link.setBorderPainted(activo);
     link.setBackground(activo ? new Color(0x264F73) : VentanaContactos.C_BG);
     link.setBorder(activo
         ? BorderFactory.createCompoundBorder(
             new LineBorder(VentanaContactos.C_ACCENT, 1, true),
-            new EmptyBorder(6, 14, 6, 14))
-        : new EmptyBorder(7, 14, 7, 15));
+            new EmptyBorder(4, 10, 4, 10))
+        : new EmptyBorder(5, 10, 5, 10));
   }
 }

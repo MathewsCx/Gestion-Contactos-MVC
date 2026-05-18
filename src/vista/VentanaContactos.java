@@ -85,9 +85,9 @@ public class VentanaContactos extends JFrame {
   private JLabel lblStatAmigos;
   private JLabel lblStatTrabajo;
 
-  private final JLabel linkEs = new JLabel("ES");
-  private final JLabel linkEn = new JLabel("EN");
-  private final JLabel linkPt = new JLabel("PT");
+  private final JButton btnLangEs = new JButton("ES");
+  private final JButton btnLangEn = new JButton("EN");
+  private final JButton btnLangPt = new JButton("PT");
   private String idiomaActivo = I18nManager.LANG_ES;
 
   private Consumer<String> onCambioIdioma;
@@ -216,16 +216,30 @@ public class VentanaContactos extends JFrame {
     titulos.add(Box.createVerticalStrut(6));
     titulos.add(lblSubtitulo);
 
-    JPanel selector = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
-    selector.setOpaque(false);
-    estiloLinkIdioma(linkEs, I18nManager.LANG_ES);
-    estiloLinkIdioma(linkEn, I18nManager.LANG_EN);
-    estiloLinkIdioma(linkPt, I18nManager.LANG_PT);
-    selector.add(linkEs);
-    selector.add(linkEn);
-    selector.add(linkPt);
+    return ComponentesUi.crearCabecera(titulos, crearSelectorIdioma());
+  }
 
-    return ComponentesUi.crearCabecera(titulos, selector);
+  private JPanel crearSelectorIdioma() {
+    JPanel selector = new JPanel();
+    selector.setLayout(new BoxLayout(selector, BoxLayout.X_AXIS));
+    selector.setOpaque(false);
+    configurarBotonIdioma(btnLangEs, I18nManager.LANG_ES);
+    configurarBotonIdioma(btnLangEn, I18nManager.LANG_EN);
+    configurarBotonIdioma(btnLangPt, I18nManager.LANG_PT);
+    for (JButton b : new JButton[] { btnLangEs, btnLangEn, btnLangPt }) {
+      Dimension tam = new Dimension(58, 32);
+      b.setMinimumSize(tam);
+      b.setPreferredSize(tam);
+      b.setMaximumSize(tam);
+    }
+    selector.add(btnLangEs);
+    selector.add(Box.createHorizontalStrut(6));
+    selector.add(btnLangEn);
+    selector.add(Box.createHorizontalStrut(6));
+    selector.add(btnLangPt);
+    selector.setPreferredSize(new Dimension(192, 36));
+    selector.setMinimumSize(new Dimension(192, 36));
+    return selector;
   }
 
   private JPanel crearPestanaGestion() {
@@ -548,14 +562,17 @@ public class VentanaContactos extends JFrame {
     return b;
   }
 
-  private void estiloLinkIdioma(JLabel link, String codigo) {
-    link.putClientProperty("lang", codigo);
-    link.addMouseListener(new MouseAdapter() {
-      @Override
-      public void mouseClicked(MouseEvent e) {
-        if (onCambioIdioma != null) {
-          onCambioIdioma.accept(codigo);
-        }
+  private void configurarBotonIdioma(JButton boton, String codigo) {
+    boton.putClientProperty("lang", codigo);
+    boton.setFocusPainted(false);
+    boton.setBorderPainted(false);
+    boton.setContentAreaFilled(false);
+    boton.setOpaque(false);
+    boton.setMargin(new Insets(2, 4, 2, 4));
+    boton.setHorizontalAlignment(SwingConstants.CENTER);
+    boton.addActionListener(e -> {
+      if (onCambioIdioma != null) {
+        onCambioIdioma.accept(codigo);
       }
     });
   }
@@ -638,16 +655,24 @@ public class VentanaContactos extends JFrame {
   }
 
   private void actualizarTextosEstadisticas() {
-    Component intro = ((JPanel) panelPestanas.getComponentAt(1)).getComponent(0);
-    if (intro instanceof JLabel) {
-      ((JLabel) intro).setText(I18nManager.get("stats.intro"));
+    if (panelPestanas == null || panelPestanas.getTabCount() < 2) {
+      return;
     }
-    JPanel grid = (JPanel) ((JPanel) panelPestanas.getComponentAt(1)).getComponent(1);
-    for (Component c : grid.getComponents()) {
-      if (c instanceof JPanel) {
-        for (Component inner : ((JPanel) c).getComponents()) {
-          if (inner instanceof JLabel lbl && lbl.getName() != null) {
-            lbl.setText(I18nManager.get(lbl.getName()));
+    Component tab = panelPestanas.getComponentAt(1);
+    if (!(tab instanceof JPanel root)) {
+      return;
+    }
+    for (Component c : root.getComponents()) {
+      if (c instanceof JLabel intro && "stats.intro".equals(intro.getName())) {
+        intro.setText(I18nManager.get("stats.intro"));
+      } else if (c instanceof JPanel grid) {
+        for (Component kpi : grid.getComponents()) {
+          if (kpi instanceof JPanel tarjeta) {
+            for (Component inner : tarjeta.getComponents()) {
+              if (inner instanceof JLabel lbl && lbl.getName() != null && lbl.getName().startsWith("stat.")) {
+                lbl.setText(I18nManager.get(lbl.getName()));
+              }
+            }
           }
         }
       }
@@ -678,13 +703,13 @@ public class VentanaContactos extends JFrame {
   }
 
   private void actualizarEstiloIdiomas() {
-    pintarLink(linkEs, I18nManager.LANG_ES);
-    pintarLink(linkEn, I18nManager.LANG_EN);
-    pintarLink(linkPt, I18nManager.LANG_PT);
+    pintarBotonIdioma(btnLangEs, I18nManager.LANG_ES);
+    pintarBotonIdioma(btnLangEn, I18nManager.LANG_EN);
+    pintarBotonIdioma(btnLangPt, I18nManager.LANG_PT);
   }
 
-  private void pintarLink(JLabel link, String codigo) {
-    ComponentesUi.actualizarEnlacesIdioma(link, codigo.equals(idiomaActivo));
+  private void pintarBotonIdioma(JButton boton, String codigo) {
+    ComponentesUi.actualizarEnlacesIdioma(boton, codigo.equals(idiomaActivo));
   }
 
   public void setOnCambioIdioma(Consumer<String> listener) {

@@ -18,15 +18,25 @@ public final class I18nManager {
 
     private static final String BUNDLE_BASE = "i18n.messages";
 
-    private static Locale localeActual = Locale.forLanguageTag(LANG_ES);
+    private static Locale localeActual = localeParaCodigo(LANG_ES);
     private static ResourceBundle bundle = cargarBundle(localeActual);
 
     private I18nManager() {
     }
 
     public static void setIdioma(String codigo) {
-        localeActual = Locale.forLanguageTag(codigo);
+        localeActual = localeParaCodigo(codigo);
         bundle = cargarBundle(localeActual);
+    }
+
+    private static Locale localeParaCodigo(String codigo) {
+        if (LANG_EN.equals(codigo)) {
+            return Locale.ENGLISH;
+        }
+        if (LANG_PT.equals(codigo)) {
+            return Locale.forLanguageTag("pt-BR");
+        }
+        return Locale.forLanguageTag("es-ES");
     }
 
     public static Locale getLocale() {
