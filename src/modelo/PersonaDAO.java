@@ -1,5 +1,9 @@
 package modelo;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -7,11 +11,15 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PersonaDAO {
     private final File archivo;
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public PersonaDAO() {
         File directorio = new File("c:/gestionContactos");
@@ -80,5 +88,23 @@ public class PersonaDAO {
                 pw.println(p.datosContacto());
             }
         }
+    }
+
+    public void exportarJson(File destino, List<Persona> contactos) throws IOException {
+        if (destino == null) {
+            throw new IOException("Archivo JSON no válido.");
+        }
+        String json = gson.toJson(contactos);
+        Files.writeString(destino.toPath(), json, StandardCharsets.UTF_8);
+    }
+
+    public List<Persona> importarJson(File origen) throws IOException {
+        if (origen == null || !origen.exists()) {
+            throw new IOException("No se encontró el archivo JSON.");
+        }
+        String json = Files.readString(origen.toPath(), StandardCharsets.UTF_8);
+        Type tipoLista = new TypeToken<List<Persona>>() {}.getType();
+        List<Persona> lista = gson.fromJson(json, tipoLista);
+        return lista != null ? lista : new ArrayList<>();
     }
 }

@@ -11,6 +11,7 @@ import util.I18nManager;
 import vista.VentanaContactos;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
@@ -59,7 +60,8 @@ public class logicaContactos {
     this.notificador = new NotificadorUi(vista);
     vista.setOnCambioIdioma(this::cambiarIdioma);
     vista.btnGuardar.addActionListener(e -> guardarContactoAsync());
-    vista.btnExportar.addActionListener(e -> exportarCsvAsync());
+    vista.btnImportar.addActionListener(e -> importarJsonAsync());
+    vista.btnExportar.addActionListener(e -> exportarArchivoAsync());
     vista.btnBenchmark.addActionListener(e -> ejecutarBenchmark());
     configurarTabla();
     registrarFiltroBusquedaAsync();
@@ -465,10 +467,15 @@ public class logicaContactos {
     vista.getTablaContactos().clearSelection();
   }
 
-  private void exportarCsvAsync() {
+  private void exportarArchivoAsync() {
     JFileChooser chooser = new JFileChooser();
     chooser.setDialogTitle(I18nManager.get("btn.export"));
-    chooser.setSelectedFile(new File("contactos_exportados.csv"));
+    FileNameExtensionFilter filtroCsv = new FileNameExtensionFilter("CSV", "csv");
+    FileNameExtensionFilter filtroJson = new FileNameExtensionFilter("JSON", "json");
+    chooser.addChoosableFileFilter(filtroCsv);
+    chooser.addChoosableFileFilter(filtroJson);
+    chooser.setFileFilter(filtroJson);
+    chooser.setSelectedFile(new File("contactos_exportados.json"));
     if (chooser.showSaveDialog(vista) != JFileChooser.APPROVE_OPTION) {
       return;
     }
@@ -476,6 +483,11 @@ public class logicaContactos {
     if (destino == null) {
       return;
     }
+    boolean exportarJson = chooser.getFileFilter() == filtroJson
+        || destino.getName().toLowerCase().endsWith(".json");
+    destino = asegurarExtension(destino, exportarJson ? ".json" : ".csv");
+    final File destinoFinal = destino;
+    vista.btnImportar.setEnabled(false);
     vista.btnExportar.setEnabled(false);
     vista.setBarraProgresoVisible(true, I18nManager.get("progress.exporting"));
     vista.setProgresoIndeterminado(I18nManager.get("progress.exporting"));
@@ -485,10 +497,40 @@ public class logicaContactos {
       copia = new ArrayList<>(contactos);
     }
 
+    if (exportarJson) {
+      new SwingWorker<Void, Void>() {
+        @Override
+        protected Void doInBackground() throws Exception {
+          modelo.exportarJson(destinoFinal, copia);
+          return null;
+        }
+
+        @Override
+        protected void done() {
+          vista.btnImportar.setEnabled(true);
+          vista.btnExportar.setEnabled(true);
+          try {
+            get();
+            vista.setProgreso(100, I18nManager.get("progress.export.done"));
+            notificador.exito(I18nManager.get("msg.export.json.ok"));
+          } catch (Exception ex) {
+            vista.setBarraProgresoVisible(false, null);
+            notificador.error(I18nManager.get("msg.error.save"));
+            return;
+          }
+          Timer t = new Timer(1500, ev -> vista.setBarraProgresoVisible(false, null));
+          t.setRepeats(false);
+          t.start();
+        }
+      }.execute();
+      return;
+    }
+
     ExportadorConcurrente.exportarAsync(
-        destino,
+        destinoFinal,
         copia,
         () -> SwingUtilities.invokeLater(() -> {
+          vista.btnImportar.setEnabled(true);
           vista.btnExportar.setEnabled(true);
           vista.setProgreso(100, I18nManager.get("progress.export.done"));
           notificador.exito(I18nManager.get("msg.export.ok"));
@@ -497,10 +539,68 @@ public class logicaContactos {
           t.start();
         }),
         ex -> SwingUtilities.invokeLater(() -> {
+          vista.btnImportar.setEnabled(true);
           vista.btnExportar.setEnabled(true);
           vista.setBarraProgresoVisible(false, null);
           notificador.error(I18nManager.get("msg.error.save"));
         }));
+  }
+
+  private void importarJsonAsync() {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setDialogTitle(I18nManager.get("btn.import"));
+    chooser.setFileFilter(new FileNameExtensionFilter("JSON", "json"));
+    if (chooser.showOpenDialog(vista) != JFileChooser.APPROVE_OPTION) {
+      return;
+    }
+    File origen = chooser.getSelectedFile();
+    if (origen == null) {
+      return;
+    }
+
+    vista.btnImportar.setEnabled(false);
+    vista.btnExportar.setEnabled(false);
+    vista.setBarraProgresoVisible(true, I18nManager.get("progress.importing"));
+    vista.setProgresoIndeterminado(I18nManager.get("progress.importing"));
+
+    new SwingWorker<List<Persona>, Void>() {
+      @Override
+      protected List<Persona> doInBackground() throws Exception {
+        return modelo.importarJson(origen);
+      }
+
+      @Override
+      protected void done() {
+        vista.btnImportar.setEnabled(true);
+        vista.btnExportar.setEnabled(true);
+        try {
+          List<Persona> importados = get();
+          synchronized (candadoContactos) {
+            contactos = new ArrayList<>(importados);
+            modelo.actualizarContactos(contactos);
+          }
+          poblarTabla(contactos);
+          actualizarEstadisticas();
+          vista.setProgreso(100, I18nManager.get("progress.import.done"));
+          notificador.exito(I18nManager.get("msg.import.ok") + " (" + contactos.size() + ")");
+        } catch (Exception ex) {
+          vista.setBarraProgresoVisible(false, null);
+          notificador.error(I18nManager.get("msg.import.error"));
+          return;
+        }
+        Timer t = new Timer(1500, ev -> vista.setBarraProgresoVisible(false, null));
+        t.setRepeats(false);
+        t.start();
+      }
+    }.execute();
+  }
+
+  private File asegurarExtension(File archivo, String extension) {
+    String nombre = archivo.getName().toLowerCase();
+    if (nombre.endsWith(extension)) {
+      return archivo;
+    }
+    return new File(archivo.getParentFile(), archivo.getName() + extension);
   }
 
   private void ejecutarBenchmark() {

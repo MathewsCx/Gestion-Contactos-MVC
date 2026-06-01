@@ -1,0 +1,18 @@
+[
+    {
+      "nombre": "Ana",
+      "apellido": "Rojas",
+      "telefono": "0991112233",
+      "email": "ana.rojas@ups.edu.ec",
+      "categoria": "Familia",
+      "favorito": true
+    },
+    {
+      "nombre": "Luis",
+      "apellido": "Mena",
+      "telefono": "0987776655",
+      "email": "luis.mena@ups.edu.ec",
+      "categoria": "Trabajo",
+      "favorito": false
+    }
+  ]

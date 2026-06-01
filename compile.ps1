@@ -1,8 +1,15 @@
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $root
-New-Item -ItemType Directory -Force -Path out | Out-Null
-javac -encoding UTF-8 -d out -sourcepath src src\Main.java
+$mvnCmd = (Get-Command mvn -ErrorAction SilentlyContinue)
+if ($null -eq $mvnCmd) {
+  $localMvn = "C:\Users\Matthews\tools\apache-maven-3.9.9\bin\mvn.cmd"
+  if (Test-Path $localMvn) {
+    $mvnCmd = $localMvn
+  } else {
+    Write-Error "Maven no esta instalado. Instala Maven 3.9+ y agrega 'mvn' al PATH."
+    exit 1
+  }
+}
+& $mvnCmd -q -DskipTests compile
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-New-Item -ItemType Directory -Force -Path out\i18n | Out-Null
-Copy-Item -Force src\i18n\*.properties out\i18n\
-Write-Host "Compilacion OK. Ejecutar: java -cp out Main"
+Write-Host "Compilacion Maven OK. Ejecutar: & `"$mvnCmd`" -q exec:java"

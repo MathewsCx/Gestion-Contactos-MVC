@@ -67,6 +67,7 @@ public class VentanaContactos extends JFrame {
   public JCheckBox chbFavoritos;
   public JButton btnGuardar;
   public JTextField txtBuscar;
+  public JButton btnImportar;
   public JButton btnExportar;
   public JButton btnBenchmark;
 
@@ -449,10 +450,16 @@ public class VentanaContactos extends JFrame {
     izq.add(lblBuscar, BorderLayout.NORTH);
     izq.add(txtBuscar, BorderLayout.CENTER);
 
+    btnImportar = crearBotonSecundario();
     btnExportar = crearBotonExportar();
 
+    JPanel acciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+    acciones.setOpaque(false);
+    acciones.add(btnImportar);
+    acciones.add(btnExportar);
+
     barra.add(izq, BorderLayout.CENTER);
-    barra.add(btnExportar, BorderLayout.EAST);
+    barra.add(acciones, BorderLayout.EAST);
     return barra;
   }
 
@@ -562,6 +569,14 @@ public class VentanaContactos extends JFrame {
     return b;
   }
 
+  private JButton crearBotonSecundario() {
+    JButton b = new JButton();
+    b.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 12));
+    ComponentesUi.decorarBoton(b, new Color(0x4B5563), new Color(0x6B7280));
+    b.setPreferredSize(new Dimension(150, 40));
+    return b;
+  }
+
   private void configurarBotonIdioma(JButton boton, String codigo) {
     boton.putClientProperty("lang", codigo);
     boton.setFocusPainted(false);
@@ -627,6 +642,7 @@ public class VentanaContactos extends JFrame {
     lblHintTabla.setText(I18nManager.get("table.hint.sort"));
     lblBuscar.setText(I18nManager.get("search.label").toUpperCase(I18nManager.getLocale()));
     btnGuardar.setText(I18nManager.get("btn.save"));
+    btnImportar.setText(I18nManager.get("btn.import"));
     btnExportar.setText(I18nManager.get("btn.export"));
     if (btnBenchmark != null) {
       btnBenchmark.setText(I18nManager.get("btn.benchmark"));

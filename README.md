@@ -11,6 +11,13 @@ Aplicación de escritorio en Java Swing (patrón **MVC**) para la asignatura Pro
   - Exportación CSV con `ExecutorService` y `synchronized`.
   - Notificaciones en barra inferior (`SwingUtilities.invokeLater`).
   - Bloqueo de edición por teléfono y `synchronized` en la lista de contactos.
+- **Unidad 4:** Gestión de dependencias y JSON:
+  - Migración del proyecto a **Maven** (`pom.xml`).
+  - Integración de **FlatLaf** para apariencia moderna.
+  - Integración de **Gson** para serialización/deserialización JSON.
+  - Importación de contactos desde archivo JSON.
+  - Exportación de contactos a JSON o CSV.
+  - Configuración de versiones estables y exclusión transitive en dependencias.
 
 ## Estructura
 
@@ -29,8 +36,10 @@ src/
 
 ```powershell
 .\compile.ps1
-java -cp out Main
+mvn -q exec:java
 ```
+
+Requisito: Maven 3.9+ disponible en `PATH`.
 
 Datos: `c:/gestionContactos/datosContactos.csv`
 

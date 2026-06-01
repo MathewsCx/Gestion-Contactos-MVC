@@ -1,4 +1,5 @@
 import controlador.logicaContactos;
+import com.formdev.flatlaf.FlatDarkLaf;
 import modelo.PersonaDAO;
 import vista.VentanaContactos;
 
@@ -11,6 +12,7 @@ import javax.swing.SwingUtilities;
 public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
+            FlatDarkLaf.setup();
             VentanaContactos.prepararTemaGlobal();
             PersonaDAO modelo = new PersonaDAO();
             VentanaContactos vista = new VentanaContactos();
